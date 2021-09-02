@@ -30,24 +30,6 @@ Resources:
                     - 'sts:AssumeRole'
             Path: "/"
 
-    # RolePolicies:
-        #Type: AWS::IAM::Policy
-        #Properties:
-            #PolicyName: AmazonS3ReadOnlyAccess
-            #PolicyDocument:
-                #Version: '2012-10-17'
-                #Statement:
-                #- 
-                    #Effect: Allow
-                    #Action: 
-                    #-   s3:Get*
-                    #-   s3:List*
-                    #Resource: 
-                    #-   arn:aws:s3:::udacity-demo-1
-                    #-   arn:aws:s3:::udacity-demo-1/*
-            #Roles:
-            #-   Ref: UdacityS3ReadOnlyEC2
-
     ProfileWithRolesForOurApp:
         Type: AWS::IAM::InstanceProfile
         Properties:
@@ -96,18 +78,16 @@ Resources:
                 Fn::Base64: !Sub |
                     #!/bin/bash
                     apt-get update -y
-                    apt-get install unzip awscli -y
                     apt-get install apache2 -y
                     systemctl start apache2.service
                     cd /var/www/html
-                    aws s3 cp s3://udacity-demo-1/udacity.zip .
-                    unzip -o udacity.zip
-            ImageId: ami-0463e2b1a99c78e06
+                    echo "Udacity Demo Web Server Up and Running!" > index.html
+            ImageId: ami-01816435b55b79ceb
             #KeyName: UdagramProject
             IamInstanceProfile: !Ref ProfileWithRolesForOurApp
             SecurityGroups:
             -   Ref: WebServerSecGroup
-            InstanceType: t3.small
+            InstanceType: t3.medium
             BlockDeviceMappings:
             -   DeviceName: "/dev/sdk"
                 Ebs:
@@ -131,7 +111,7 @@ Resources:
         Type: AWS::AutoScaling::AutoScalingGroup
         Properties:
             VPCZoneIdentifier:  
-            -   Fn::ImportValue: !Sub ${EnvironmentName}-PRIV-NETS
+                -  Fn::ImportValue: !Sub ${EnvironmentName}-PRIV-NETS
             LaunchConfigurationName:
                 Ref: WebAppLaunchConfig
             MinSize: '4'
@@ -142,10 +122,11 @@ Resources:
     WebAppLB:
         Type: AWS::ElasticLoadBalancingV2::LoadBalancer
         Properties:
-            SecurityGroups:
+          Subnets:
+            - Fn::ImportValue: !Sub "${EnvironmentName}-PUB1-SN"
+            - Fn::ImportValue: !Sub "${EnvironmentName}-PUB2-SN"
+          SecurityGroups:
             - Ref: LoadBalancerSecGroup
-            Subnets:
-            -  Fn::ImportValue: !Sub "${EnvironmentName}-PUB-NETS"
             
     Listener:
         Type: AWS::ElasticLoadBalancingV2::Listener
