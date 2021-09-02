@@ -16,40 +16,42 @@ Resources:
     UdacityS3ReadOnlyEC2:
         Type: AWS::IAM::Role
         Properties:
-            RoleName: 
-                !Sub ${EnvironmentName}-Role
+            ManagedPolicyArns:
+                - "arn:aws:iam::aws:policy/AmazonS3ReadOnlyAccess"
+                - "arn:aws:iam::aws:policy/AmazonSSMFullAccess"
             AssumeRolePolicyDocument:
-                Version: "2012-10-17"
+                Version: 2012-10-17
                 Statement:
                 -   Effect: Allow
                     Principal:
                         Service:
                         - ec2.amazonaws.com
                     Action:
-                    - sts:AssumeRole
+                    - 'sts:AssumeRole'
             Path: "/"
 
-    RolePolicies:
-        Type: AWS::IAM::Policy
-        Properties:
-            PolicyName: AmazonS3ReadOnlyAccess
-            PolicyDocument:
-                Version: '2012-10-17'
-                Statement:
-                - 
-                    Effect: Allow
-                    Action: 
-                    -   s3:Get*
-                    -   s3:List*
-                    Resource: 
-                    -   arn:aws:s3:::udacity-demo-1
-                    -   arn:aws:s3:::udacity-demo-1/*
-            Roles:
-            -   Ref: UdacityS3ReadOnlyEC2
+    # RolePolicies:
+        #Type: AWS::IAM::Policy
+        #Properties:
+            #PolicyName: AmazonS3ReadOnlyAccess
+            #PolicyDocument:
+                #Version: '2012-10-17'
+                #Statement:
+                #- 
+                    #Effect: Allow
+                    #Action: 
+                    #-   s3:Get*
+                    #-   s3:List*
+                    #Resource: 
+                    #-   arn:aws:s3:::udacity-demo-1
+                    #-   arn:aws:s3:::udacity-demo-1/*
+            #Roles:
+            #-   Ref: UdacityS3ReadOnlyEC2
 
     ProfileWithRolesForOurApp:
         Type: AWS::IAM::InstanceProfile
         Properties:
+            Path: "/"
             Roles:
             - Ref: UdacityS3ReadOnlyEC2
 
@@ -133,7 +135,7 @@ Resources:
             LaunchConfigurationName:
                 Ref: WebAppLaunchConfig
             MinSize: '4'
-            MaxSize: '8'
+            MaxSize: '4'
             TargetGroupARNs:
             -   Ref: WebAppTargetGroup
 
@@ -173,6 +175,11 @@ Outputs:
 
     WebAppLoadBalancerDNSName:
         Description: DNS name or Public URL of the Load Balancer
-        Value: !Join [ "", [ 'http://', !GetAtt WebAppLB.DNSName ]]
+        Value: 
+        #!Join [ "", [ 'http://', !GetAtt WebAppLB.DNSName ]]
+        !Join
+            - ''
+            - - 'http://'
+             - !GetAtt WebAppLB.DNSName
         Export:
-            Name: !Sub ${EnvironmentName}-LB-DNSName
+            Name: !Sub ${EnvironmentName}-WEB-APP-URL
