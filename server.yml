@@ -21,12 +21,12 @@ Resources:
             AssumeRolePolicyDocument:
                 Version: "2012-10-17"
                 Statement:
-                    Effect: Allow
+                -   Effect: Allow
                     Principal:
                         Service:
-                            ec2.amazonaws.com
+                        - ec2.amazonaws.com
                     Action:
-                        sts:AssumeRole
+                    - sts:AssumeRole
             Path: "/"
 
     RolePolicies:
@@ -36,22 +36,22 @@ Resources:
             PolicyDocument:
                 Version: '2012-10-17'
                 Statement:
-                    
+                - 
                     Effect: Allow
                     Action: 
-                        s3:Get*
-                        s3:List*
+                    -   s3:Get*
+                    -   s3:List*
                     Resource: 
-                        arn:aws:s3:::udacity-demo-1
-                        arn:aws:s3:::udacity-demo-1/*
+                    -   arn:aws:s3:::udacity-demo-1
+                    -   arn:aws:s3:::udacity-demo-1/*
             Roles:
-                Ref: UdacityS3ReadOnlyEC2
+            -   Ref: UdacityS3ReadOnlyEC2
 
     ProfileWithRolesForOurApp:
         Type: AWS::IAM::InstanceProfile
         Properties:
             Roles:
-                Ref: UdacityS3ReadOnlyEC2
+            - Ref: UdacityS3ReadOnlyEC2
 
     LoadBalancerSecGroup:
             Type: AWS::EC2::SecurityGroup
@@ -60,12 +60,12 @@ Resources:
                 VpcId: 
                     Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
                 SecurityGroupIngress:
-                    IpProtocol: tcp
+                -   IpProtocol: tcp
                     FromPort: 80
                     ToPort: 80
                     CidrIp: 0.0.0.0/0 #allows inbound access to HTTP port 80
                 SecurityGroupEgress:
-                    IpProtocol: tcp
+                -   IpProtocol: tcp
                     FromPort: 80
                     ToPort: 80
                     CidrIp: 0.0.0.0/0 #allows outbound access for HTTP port 80
@@ -77,12 +77,12 @@ Resources:
             VpcId: 
                 Fn::ImportValue: !Sub "${EnvironmentName}-VPCID"
             SecurityGroupIngress:
-                IpProtocol: tcp
+            -   IpProtocol: tcp
                 FromPort: 80
                 ToPort: 80
                 SourceSecurityGroupId: !Ref LoadBalancerSecGroup
             SecurityGroupEgress:
-                IpProtocol: tcp
+            -   IpProtocol: tcp
                 FromPort: 0
                 ToPort: 65535
                 CidrIp: 0.0.0.0/0 #allows all ports to send outbound traffic
@@ -104,10 +104,10 @@ Resources:
             KeyName: UdagramProject
             IamInstanceProfile: !Ref ProfileWithRolesForOurApp
             SecurityGroups:
-                Ref: WebServerSecGroup
+            -   Ref: WebServerSecGroup
             InstanceType: t3.small
             BlockDeviceMappings:
-                DeviceName: "/dev/sdk"
+            -   DeviceName: "/dev/sdk"
                 Ebs:
                     VolumeSize: '10' #this specifies that 10GB of disk space will be provisioned for the deployment
 
@@ -129,27 +129,29 @@ Resources:
         Type: AWS::AutoScaling::AutoScalingGroup
         Properties:
             VPCZoneIdentifier:  
-                Fn::ImportValue: !Sub ${EnvironmentName}-PRIV-NETS
+            -   Fn::ImportValue: !Sub ${EnvironmentName}-PRIV-NET2
+            -   Fn::ImportValue: !Sub ${EnvironmentName}-PRIV-NET2
             LaunchConfigurationName:
                 Ref: WebAppLaunchConfig
             MinSize: '4'
             MaxSize: '8'
             TargetGroupARNs:
-                Ref: WebAppTargetGroup
+            -   Ref: WebAppTargetGroup
 
     WebAppLB:
         Type: AWS::ElasticLoadBalancingV2::LoadBalancer
         Properties:
             SecurityGroups:
-                Ref: LoadBalancerSecGroup
+            - Ref: LoadBalancerSecGroup
             Subnets:
-                Fn::ImportValue: !Sub ${EnvironmentName}-PUB-NETS
+            -  Fn::ImportValue: !Sub "${EnvironmentName}-PUB-NET1"
+            -  Fn::ImportValue: !Sub "${EnvironmentName}-PUB-NET2"
             
     Listener:
         Type: AWS::ElasticLoadBalancingV2::Listener
         Properties:
             DefaultActions:
-                Type: forward
+            -   Type: forward
                 TargetGroupArn:
                     Ref: WebAppTargetGroup
             LoadBalancerArn:
@@ -161,10 +163,10 @@ Resources:
         Type: AWS::ElasticLoadBalancingV2::ListenerRule
         Properties:
             Actions:
-                Type: forward
+            -   Type: forward
                 TargetGroupArn: !Ref 'WebAppTargetGroup'
             Conditions:
-                Field: path-pattern
+            -   Field: path-pattern
                 Values: [/]
             ListenerArn: !Ref 'Listener'
             Priority: 1
