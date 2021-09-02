@@ -100,7 +100,7 @@ Resources:
                     cd /var/www/html
                     aws s3 cp s3://udacity-demo-1/udacity.zip .
                     unzip -o udacity.zip
-            ImageId: !Sub ${AMItoUse}
+            ImageId: ami-0463e2b1a99c78e06
             KeyName: UdagramProject
             IamInstanceProfile: !Ref ProfileWithRolesForOurApp
             SecurityGroups:
