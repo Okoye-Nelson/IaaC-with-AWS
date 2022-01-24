@@ -1,10 +1,10 @@
 [
     {
         "ParameterKey": "EnvironmentName",
-        "ParameterValue": "UdagramProject"
+        "ParameterValue": "NelsonProject"
     },
     {
         "ParameterKey": "AMItoUse",
-        "ParameterValue": "ami-0463e2b1a99c78e06"
+        "ParameterValue": "ami-0892d3c7ee96c0bf7"
     }
 ]

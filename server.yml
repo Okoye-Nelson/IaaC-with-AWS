@@ -82,12 +82,12 @@ Resources:
                     systemctl start apache2.service
                     cd /var/www/html
                     echo "Udacity Demo Web Server Up and Running!" > index.html
-            ImageId: ami-01816435b55b79ceb
+            ImageId: ami-0892d3c7ee96c0bf7
             #KeyName: UdagramProject
             IamInstanceProfile: !Ref ProfileWithRolesForOurApp
             SecurityGroups:
             -   Ref: WebServerSecGroup
-            InstanceType: t3.medium
+            InstanceType: t3.micro
             BlockDeviceMappings:
             -   DeviceName: "/dev/sdk"
                 Ebs:
